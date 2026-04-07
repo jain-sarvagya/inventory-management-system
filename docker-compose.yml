@@ -1,0 +1,111 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: ims_mysql
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME_AUTH}
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d
+
+
+  auth_service:
+    build:
+      context: ./backend/auth_service
+    container_name: auth_service
+
+    ports:
+      - "5000:5000"
+
+    env_file:
+      - .env
+
+    environment:
+      DB_NAME: ${DB_NAME_AUTH}
+
+    depends_on:
+      - mysql
+
+
+  category_service:
+    build:
+      context: ./backend/category_service
+    container_name: category_service
+
+    ports:
+      - "5001:5001"
+
+    env_file:
+      - .env
+
+    environment:
+      DB_NAME: ${DB_NAME_IMS}
+
+    depends_on:
+      - mysql
+
+
+  subcategory_service:
+    build:
+      context: ./backend/subcategory_service
+    container_name: subcategory_service
+
+    ports:
+      - "5002:5002"
+
+    env_file:
+      - .env
+
+    environment:
+      DB_NAME: ${DB_NAME_IMS}
+
+    depends_on:
+      - mysql
+
+
+  product_service:
+    build:
+      context: ./backend/product_service
+    container_name: product_service
+
+    ports:
+      - "5003:5003"
+
+    env_file:
+      - .env
+
+    environment:
+      DB_NAME: ${DB_NAME_IMS}
+
+    depends_on:
+      - mysql
+
+
+  order_service:
+    build:
+      context: ./backend/order_service
+    container_name: order_service
+
+    ports:
+      - "5004:5004"
+
+    env_file:
+      - .env
+
+    environment:
+      DB_NAME: ${DB_NAME_IMS}
+
+    depends_on:
+      - mysql
+
+
+volumes:
+  mysql_data:
